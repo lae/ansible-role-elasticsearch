@@ -1,0 +1,17 @@
+---
+# tasks file for ansible-role-elasticsearch
+- name: Trust Elasticsearch' packaging key.
+  apt_key:
+    keyserver: pgp.mit.edu
+    id: D88E42B4
+    state: present
+
+- name: Add Elasticsearch repository.
+  apt_repository:
+    filename: elasticsearch
+    repo: 'deb http://packages.elastic.co/elasticsearch/2.x/debian stable main'
+    state: present
+    update_cache: yes
+
+- name: Install Elasticsearch.
+  apt: pkg=elasticsearch state=present
