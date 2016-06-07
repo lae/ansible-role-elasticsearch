@@ -15,9 +15,9 @@
 
   - name: Install Elasticsearch.
     apt:
-      name: "elasticsearch={{ elasticsearch_major_minor_version }}"
+      name: "elasticsearch={{ elasticsearch_major_minor_version }}.*"
       update_cache: yes
-      state: latest
+      state: present
 
   - name: Configure elasticsearch.yml.
     template:
