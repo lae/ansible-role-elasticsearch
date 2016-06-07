@@ -1,6 +1,6 @@
 ---
 # defaults file for ansible-role-elasticsearch
-elasticsearch_version: 2.3.3
+elasticsearch_major_minor_version: 2.3
 # The following variables are used in the elasticsearch configuration file.
 # Please review templates/elasticsearch.yml.j2 for notes.
 # Most commented variables below have saner defaults in the above file.

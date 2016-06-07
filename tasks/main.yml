@@ -15,13 +15,13 @@
 
   - name: Install Elasticsearch.
     apt:
-      name: "elasticsearch={{ elasticsearch_version }}"
+      name: "elasticsearch={{ elasticsearch_major_minor_version }}"
       update_cache: yes
-      state: present
+      state: latest
 
   - name: Configure elasticsearch.yml.
     template:
-      src: elasticsearch-2.0.0.yml.j2
+      src: elasticsearch-2.x.yml.j2
       dest: /etc/elasticsearch/elasticsearch.yml
       backup: yes
 
@@ -30,4 +30,4 @@
       name: elasticsearch
       enabled: yes
 
-  when: "elasticsearch_version >= 2.0.0"
+  when: "elasticsearch_major_minor_version >= 2.0"
