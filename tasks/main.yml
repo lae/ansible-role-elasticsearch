@@ -1,31 +1,31 @@
 ---
 # tasks file for ansible-role-elasticsearch
-- name: Trust Elasticsearch' packaging key.
+- name: Trust Elasticsearch' packaging key
   apt_key:
     keyserver: pgp.mit.edu
     id: D88E42B4
     state: present
 
 - block:
-  - name: Add Elasticsearch repository.
+  - name: Add Elasticsearch repository
     apt_repository:
       filename: elasticsearch
       repo: 'deb http://packages.elastic.co/elasticsearch/2.x/debian stable main'
       state: present
 
-  - name: Install Elasticsearch.
+  - name: Install Elasticsearch
     apt:
       name: "elasticsearch={{ elasticsearch_major_minor_version }}.*"
       update_cache: yes
       state: present
 
-  - name: Configure elasticsearch.yml.
+  - name: Configure elasticsearch.yml
     template:
       src: elasticsearch-2.x.yml.j2
       dest: /etc/elasticsearch/elasticsearch.yml
       backup: yes
 
-  - name: Enable the Elasticsearch service.
+  - name: Enable the Elasticsearch service
     service:
       name: elasticsearch
       enabled: yes
