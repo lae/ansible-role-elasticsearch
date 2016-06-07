@@ -80,7 +80,9 @@ discovery.zen.ping.unicast.hosts:
     - "{{ host }}"
 {% endfor %}
 {% endif %}
+{% if elasticsearch_hostgroup is defined %}
 discovery.zen.minimum_master_nodes: {{ groups[elasticsearch_hostgroup] | length // 2 + 1 }}
+{% endif %}
 # ---------------------------------- Gateway -----------------------------------
 #
 # Block initial recovery after a full cluster restart until N nodes are started:
