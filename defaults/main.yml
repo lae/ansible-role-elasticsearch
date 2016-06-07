@@ -1,2 +1,14 @@
 ---
 # defaults file for ansible-role-elasticsearch
+elasticsearch_version: 2.3.3
+# The following variables are used in the elasticsearch configuration file.
+# Please review templates/elasticsearch.yml.j2 for notes.
+# Most commented variables below have saner defaults in the above file.
+#elasticsearch_cluster_name: research01
+#elasticsearch_node_name: machine03
+#elasticsearch_node_attributes: []
+#elasticsearch_path_data: /mnt/disk1,/mnt/disk2,/mnt/disk3
+#elasticsearch_path_logs: /var/log/elasticsearch
+#elasticsearch_http_port: 9201
+#elasticsearch_network_host: _site_
+elasticsearch_disable_deletion_of_all_indices: true
