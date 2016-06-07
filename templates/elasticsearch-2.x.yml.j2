@@ -76,12 +76,10 @@ transport.tcp.port: {{ elasticsearch_transport_tcp_port | default("9300") }}
 #}
 {% if elasticsearch_hostgroup_discovery is defined %}
 discovery.zen.ping.unicast.hosts:
-    {% for host in groups[elasticsearch_hostgroup_discovery] %}
+{% for host in groups[elasticsearch_hostgroup_discovery] %}
     - "{{ host }}"
-    {% endfor %}
+{% endfor %}
 {% endif %}
-{#
-#}
 discovery.zen.minimum_master_nodes: {{ groups[elasticsearch_hostgroup] | length // 2 + 1 }}
 # ---------------------------------- Gateway -----------------------------------
 #
