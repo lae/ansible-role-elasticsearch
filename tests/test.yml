@@ -5,3 +5,8 @@
   roles:
     - williamyeh.oracle-java
     - ansible-role-elasticsearch
+  vars:
+    elasticsearch_cluster_name: test01
+    elasticsearch_hostgroup: all
+    elasticsearch_hostgroup_discovery: all
+    elasticsearch_network_host: _local_
