@@ -3,3 +3,6 @@
 - name: elasticsearch restart needed
   debug:
     msg: "Elasticsearch needs to be restarted on {{ inventory_hostname }}. Please do so manually or serially with Ansible."
+
+- name: reload systemd unit files
+  shell: systemctl daemon-reload
