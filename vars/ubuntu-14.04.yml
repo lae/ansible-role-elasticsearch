@@ -1,2 +1,2 @@
 ---
-_elasticsearch_init_method: upstart
+_elasticsearch_service_method: upstart

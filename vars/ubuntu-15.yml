@@ -1,2 +1,2 @@
 ---
-_elasticsearch_init_method: systemd
+_elasticsearch_service_method: systemd

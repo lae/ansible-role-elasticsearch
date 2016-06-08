@@ -1,2 +1,2 @@
 ---
-_elasticsearch_init_method: sysvinit
+_elasticsearch_service_method: sysvinit
