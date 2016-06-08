@@ -4,13 +4,17 @@
 elasticsearch
 =========
 
-Installs and configures Elasticsearch.
+Installs and configures Elasticsearch as part of a multi-node cluster.
 
 ## Notes
 
 This Ansible role does not start or restart Elasticsearch on changes as there 
 is a lack of configuration file validation tools. This role will inform you if 
 a restart is needed, however, so please do so then.
+
+Please note that most configuration decisions (like the above) within this role 
+are meant for production clusters, which may not make this role suitable for 
+dev environments. (The intention is to cater to both eventually.)
 
 ## Role Variables
 
