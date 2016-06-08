@@ -29,6 +29,18 @@
     notify:
       - elasticsearch restart needed
 
+  - name: Configure nofile for Elasticsearch in PAM limits
+    domain: elasticsearch
+    limit_type: -
+    limit_item: nofile
+    value: "{{ elasticsearch_max_open_files }}"
+
+  - name: Configure memlock for Elasticsearch in PAM limits
+    domain: elasticsearch
+    limit_type: -
+    limit_item: memlock
+    value: "{{ elasticsearch_max_locked_memory }}"
+
   - name: Enable the Elasticsearch service
     service:
       name: elasticsearch

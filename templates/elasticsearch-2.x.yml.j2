@@ -47,14 +47,8 @@ path.data: {{ elasticsearch_path_data }}
 {% if elasticsearch_path_logs is defined %}
 path.logs: {{ elasticsearch_path_logs }}
 {% endif %}
-{# Lock the memory on startup:
-# bootstrap.mlockall: true
-#
-# Make sure that the `ES_HEAP_SIZE` environment variable is set to about half the memory
-# available on the system and that the owner of the process is allowed to use this limit.
-#
-# Elasticsearch performs poorly when the system is swapping the memory.
-#}
+{# Lock the memory on startup. #}
+bootstrap.mlockall: true
 {#
     `elasticsearch_network_host` tells ES what IP address or interface to bind.
     By default we use `_site_`, which tells ES to use a private IP address that

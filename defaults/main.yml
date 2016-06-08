@@ -1,6 +1,9 @@
 ---
 # defaults file for ansible-role-elasticsearch
+# This should be the major and minor version that you want to install.
+# This role will install the latest patch version.
 elasticsearch_major_minor_version: 2.3
+
 # The following variables are used in the elasticsearch configuration file.
 # Please review templates/elasticsearch.yml.j2 for notes.
 # Most commented variables below have saner defaults in the above file.
@@ -12,3 +15,14 @@ elasticsearch_major_minor_version: 2.3
 #elasticsearch_http_port: 9201
 #elasticsearch_network_host: _site_
 elasticsearch_disable_deletion_of_all_indices: true
+
+# The following configures ES_RESTART_ON_UPGRADE in /etc/default/elasticsearch
+elasticsearch_restart_on_upgrade: false
+
+# The following are resource limits, which are used to configure
+# /etc/security/limits.conf, the default file and the systemd unit file.
+elasticsearch_max_open_files: 131070
+elasticsearch_max_locked_memory: unlimited
+# This one automatically gets configured to the smaller of (RAM/2)-1GB & 31GB.
+# You must specify a unit "m" or "g" when overriding.
+#elasticsearch_heap_size:
