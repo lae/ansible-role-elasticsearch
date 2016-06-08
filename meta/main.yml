@@ -1,6 +1,6 @@
 galaxy_info:
   author: Musee Ullah
-  description: Installs and configures Elasticsearch
+  description: Installs and configures a production Elasticsearch cluster
   company: FireEye, Inc.
   # issue_tracker_url: http://example.com/issue/tracker
   license: MIT
