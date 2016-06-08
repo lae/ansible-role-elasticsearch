@@ -15,6 +15,7 @@ elasticsearch_major_minor_version: 2.3
 elasticsearch_http_port: 9200
 elasticsearch_transport_tcp_port: 9300
 elasticsearch_network_host: _site_
+elasticsearch_only_allow_one_instance: true
 elasticsearch_disable_deletion_of_all_indices: true
 
 # The following configures ES_RESTART_ON_UPGRADE in /etc/default/elasticsearch

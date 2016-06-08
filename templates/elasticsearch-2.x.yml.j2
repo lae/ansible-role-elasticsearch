@@ -77,16 +77,10 @@ discovery.zen.ping.unicast.hosts:
 {% if elasticsearch_hostgroup is defined %}
 discovery.zen.minimum_master_nodes: {{ groups[elasticsearch_hostgroup] | length // 2 + 1 }}
 {% endif %}
-# ---------------------------------- Gateway -----------------------------------
-#
-# Block initial recovery after a full cluster restart until N nodes are started:
-#
-# gateway.recover_after_nodes: 3
-#
-# For more information, see the documentation at:
-# <http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-gateway.html>
 {# Disable starting multiple nodes on a single system: #}
-# node.max_local_storage_nodes: 1
+{% if elasticsearch_only_allow_one_instance %}
+node.max_local_storage_nodes: 1
+{% endif %}
 {# Require explicit names when deleting indices: #}
 # action.destructive_requires_name: true
 action.disable_delete_all_indices: {{ elasticsearch_disable_deletion_of_all_indices | ternary("true", "false") }}
