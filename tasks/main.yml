@@ -37,6 +37,14 @@
     notify:
       - elasticsearch restart needed
 
+  - name: Configure elasticsearch default file
+    template:
+      src: default-2.x.j2
+      dest: /etc/default/elasticsearch
+      backup: yes
+    notify:
+      - elasticsearch restart needed
+
   - name: Configure nofile for Elasticsearch in PAM limits
     pam_limits:
       domain: elasticsearch
