@@ -1,6 +1,5 @@
 ---
 # handlers file for ansible-role-elasticsearch
-- name: restart elasticsearch
-  service:
-    name: elasticsearch
-    state: restarted
+- name: elasticsearch restart needed
+  debug:
+    msg: "Elasticsearch needs to be restarted on {{ inventory_hostname }}. Please do so manually or serially with Ansible."

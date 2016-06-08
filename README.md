@@ -6,6 +6,12 @@ elasticsearch
 
 Installs and configures Elasticsearch.
 
+## Notes
+
+This Ansible role does not start or restart Elasticsearch on changes as there 
+is a lack of configuration file validation tools. This role will inform you if 
+a restart is needed, however, so please do so then.
+
 ## Role Variables
 
 ### Mandatory Variables

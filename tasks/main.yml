@@ -18,12 +18,16 @@
       name: "elasticsearch={{ elasticsearch_major_minor_version }}.*"
       update_cache: yes
       state: present
+    notify:
+      - elasticsearch restart needed
 
   - name: Configure elasticsearch.yml
     template:
       src: elasticsearch-2.x.yml.j2
       dest: /etc/elasticsearch/elasticsearch.yml
       backup: yes
+    notify:
+      - elasticsearch restart needed
 
   - name: Enable the Elasticsearch service
     service:
