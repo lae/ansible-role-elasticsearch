@@ -16,6 +16,11 @@ Please note that most configuration decisions (like the above) within this role
 are meant for production clusters, which may not make this role suitable for 
 dev environments. (The intention is to cater to both eventually.)
 
+You should, in a separate role or playbook, configure the software firewall on 
+the machines in your cluster to only allow each other to communicate with each 
+other on your transport port. You will likely want to also use a whitelist for 
+Elasticsearch API clients for the HTTP port.
+
 ## Role Variables
 
 ### Mandatory Variables
