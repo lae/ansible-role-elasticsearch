@@ -37,6 +37,14 @@
     notify:
       - elasticsearch restart needed
 
+  - name: Configure elasticsearch default file
+    template:
+      src: default-2.x.j2
+      dest: /etc/default/elasticsearch
+      backup: yes
+    notify:
+      - elasticsearch restart needed
+
   - name: Configure nofile for Elasticsearch in PAM limits
     pam_limits:
       domain: elasticsearch
@@ -59,14 +67,18 @@
         regexp: "^#?LimitNOFILE="
         line: "LimitNOFILE={{ elasticsearch_max_open_files }}"
         state: present
+      notify:
+        - reload systemd unit files
 
     - name: Configure memlock for Elasticsearch in systemd unit file
       lineinfile:
         dest: /usr/lib/systemd/system/elasticsearch.service
         insertafter: '^\[Service\]'
         regexp: "^#?LimitMEMLOCK="
-        line: "LimitMEMLOCK={{ elasticsearch_max_locked_memory }}"
+        line: "LimitMEMLOCK={{ (elasticsearch_max_locked_memory == 'unlimited') | ternary('infinity', elasticsearch_max_locked_memory) }}"
         state: present
+      notify:
+        - reload systemd unit files
 
     when: "_elasticsearch_service_method == 'systemd'"
 
