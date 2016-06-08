@@ -1,5 +1,13 @@
 ---
 # tasks file for ansible-role-elasticsearch
+- name: "Gather OS specific variables"
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution|lower }}-{{ ansible_distribution_version }}.yml"
+    - "{{ ansible_distribution|lower }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution|lower }}.yml"
+    - "{{ ansible_os_family|lower }}.yml"
+
 - name: Trust Elasticsearch' packaging key
   apt_key:
     keyserver: pgp.mit.edu
@@ -40,6 +48,25 @@
     limit_type: -
     limit_item: memlock
     value: "{{ elasticsearch_max_locked_memory }}"
+
+  - block:
+    - name: Configure nofile for Elasticsearch in systemd unit file
+      lineinfile:
+        dest: /usr/lib/systemd/system/elasticsearch.service
+        insertafter: "^\[Service\]"
+        regexp: "^#?LimitNOFILE="
+        line: "LimitNOFILE={{ elasticsearch_max_open_files }}"
+        state: present
+
+    - name: Configure memlock for Elasticsearch in systemd unit file
+      lineinfile:
+        dest: /usr/lib/systemd/system/elasticsearch.service
+        insertafter: "^\[Service\]"
+        regexp: "^#?LimitMEMLOCK="
+        line: "LimitMEMLOCK={{ elasticsearch_max_locked_memory }}"
+        state: present
+
+    when: "_elasticsearch_service_method == 'systemd'"
 
   - name: Enable the Elasticsearch service
     service:
