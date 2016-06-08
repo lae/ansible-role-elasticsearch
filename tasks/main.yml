@@ -73,7 +73,7 @@
         dest: /usr/lib/systemd/system/elasticsearch.service
         insertafter: '^\[Service\]'
         regexp: "^#?LimitMEMLOCK="
-        line: "LimitMEMLOCK={{ elasticsearch_max_locked_memory }}"
+        line: "LimitMEMLOCK={{ elasticsearch_max_locked_memory == 'unlimited' | ternary('infinity', elasticsearch_max_locked_memory }}"
         state: present
 
     when: "_elasticsearch_service_method == 'systemd'"
