@@ -58,11 +58,11 @@ bootstrap.mlockall: true
     Review http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-network.html
     for other valid values.
 #}
-network.host: {{ elasticsearch_network_host | default("_site_") }}
+network.host: {{ elasticsearch_network_host }}
 {# Configures what port ES listens on for API communication. #}
-http.port: {{ elasticsearch_http_port | default("9200") }}
+http.port: {{ elasticsearch_http_port }}
 {# Configures what port ES listens to for cluster communication. #}
-transport.tcp.port: {{ elasticsearch_transport_tcp_port | default("9300") }}
+transport.tcp.port: {{ elasticsearch_transport_tcp_port }}
 {#
     `elasticsearch_hostgroup_discovery` must be a group name defined in your 
     inventory. If defined, the following configures ES to treat these hosts as 

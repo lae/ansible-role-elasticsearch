@@ -12,8 +12,9 @@ elasticsearch_major_minor_version: 2.3
 #elasticsearch_node_attributes: []
 #elasticsearch_path_data: /mnt/disk1,/mnt/disk2,/mnt/disk3
 #elasticsearch_path_logs: /var/log/elasticsearch
-#elasticsearch_http_port: 9201
-#elasticsearch_network_host: _site_
+elasticsearch_http_port: 9200
+elasticsearch_transport_tcp_port: 9300
+elasticsearch_network_host: _site_
 elasticsearch_disable_deletion_of_all_indices: true
 
 # The following configures ES_RESTART_ON_UPGRADE in /etc/default/elasticsearch
