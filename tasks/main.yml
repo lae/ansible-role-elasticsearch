@@ -38,22 +38,24 @@
       - elasticsearch restart needed
 
   - name: Configure nofile for Elasticsearch in PAM limits
-    domain: elasticsearch
-    limit_type: "-"
-    limit_item: nofile
-    value: "{{ elasticsearch_max_open_files }}"
+    pam_limits:
+      domain: elasticsearch
+      limit_type: "-"
+      limit_item: nofile
+      value: "{{ elasticsearch_max_open_files }}"
 
   - name: Configure memlock for Elasticsearch in PAM limits
-    domain: elasticsearch
-    limit_type: "-"
-    limit_item: memlock
-    value: "{{ elasticsearch_max_locked_memory }}"
+    pam_limits:
+      domain: elasticsearch
+      limit_type: "-"
+      limit_item: memlock
+      value: "{{ elasticsearch_max_locked_memory }}"
 
   - block:
     - name: Configure nofile for Elasticsearch in systemd unit file
       lineinfile:
         dest: /usr/lib/systemd/system/elasticsearch.service
-        insertafter: "^\[Service\]"
+        insertafter: '^\[Service\]'
         regexp: "^#?LimitNOFILE="
         line: "LimitNOFILE={{ elasticsearch_max_open_files }}"
         state: present
@@ -61,7 +63,7 @@
     - name: Configure memlock for Elasticsearch in systemd unit file
       lineinfile:
         dest: /usr/lib/systemd/system/elasticsearch.service
-        insertafter: "^\[Service\]"
+        insertafter: '^\[Service\]'
         regexp: "^#?LimitMEMLOCK="
         line: "LimitMEMLOCK={{ elasticsearch_max_locked_memory }}"
         state: present
