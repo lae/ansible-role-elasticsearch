@@ -1,0 +1,92 @@
+# {{ ansible_managed }}
+{#
+    Please see the documentation for further information on configuration options:
+    <http://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration.html>
+#}
+{#
+    Sets the cluster name to `elasticsearch_cluster_name`. You must define this.
+#}
+cluster.name: {{ elasticsearch_cluster_name | mandatory }}
+{#
+    Sets the node name to the hostname defined in your Ansible inventory (not 
+    FQDN). You can override this by setting `elasticsearch_node_name` for each 
+    host to a special name.
+#}
+node.name: {{ elasticsearch_node_name | default(inventory_hostname_short) }}
+{#
+    Sets custom attributes on a node from a dict. As an example:
+
+    ```
+    elasticsearch_node_attributes:
+        rack: r1
+        datacenter: equinix-sv2
+    ```
+
+    in your host variables file will map to:
+
+    ```
+    node.rack: r1
+    node.datacenter: equinix-sv2
+    ```
+#}
+{% if elasticsearch_node_attributes is defined %}
+    {% for key, value in elasticsearch_node_attributes.iteritems() %}
+node.{{ key }}: {{ value }}
+    {% endfor %}
+{% endif %}
+{#
+    Where to store Elasticsearch data.
+    If using multiple disks/mounts, specify a comma-separated string.
+    Default on Debian/Ubuntu: /var/lib/elasticsearch/data
+    Default on RHEL/CentOS: /var/lib/elasticsearch
+#}
+{% if elasticsearch_path_data is defined %}
+path.data: {{ elasticsearch_path_data }}
+{% endif %}
+{# Where to store Elasticsearch logs. Default is /var/log/elasticsearch. #}
+{% if elasticsearch_path_logs is defined %}
+path.logs: {{ elasticsearch_path_logs }}
+{% endif %}
+{# Lock the memory on startup. #}
+bootstrap.mlockall: true
+{#
+    `elasticsearch_network_host` tells ES what IP address or interface to bind.
+    By default we use `_site_`, which tells ES to use a private IP address that
+    most likely is networked. You may want to use `_global_` instead, depending 
+    on your environment, or `{{ ansible_default_ipv4.address }}`.
+
+    Review http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-network.html
+    for other valid values.
+#}
+network.host: {{ elasticsearch_network_host | default("_site_") }}
+{# Configures what port ES listens on for API communication. #}
+http.port: {{ elasticsearch_http_port | default("9200") }}
+{# Configures what port ES listens to for cluster communication. #}
+transport.tcp.port: {{ elasticsearch_transport_tcp_port | default("9300") }}
+{#
+    `elasticsearch_hostgroup_discovery` must be a group name defined in your 
+    inventory. If defined, the following configures ES to treat these hosts as 
+    gossip routers during the discovery process.
+#}
+{% if elasticsearch_hostgroup_discovery is defined %}
+discovery.zen.ping.unicast.hosts:
+{% for host in groups[elasticsearch_hostgroup_discovery] %}
+    - "{{ host }}"
+{% endfor %}
+{% endif %}
+{% if elasticsearch_hostgroup is defined %}
+discovery.zen.minimum_master_nodes: {{ groups[elasticsearch_hostgroup] | length // 2 + 1 }}
+{% endif %}
+# ---------------------------------- Gateway -----------------------------------
+#
+# Block initial recovery after a full cluster restart until N nodes are started:
+#
+# gateway.recover_after_nodes: 3
+#
+# For more information, see the documentation at:
+# <http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-gateway.html>
+{# Disable starting multiple nodes on a single system: #}
+# node.max_local_storage_nodes: 1
+{# Require explicit names when deleting indices: #}
+# action.destructive_requires_name: true
+action.disable_delete_all_indices: {{ elasticsearch_disable_deletion_of_all_indices | ternary("true", "false") }}
