@@ -76,6 +76,10 @@ discovery.zen.ping.unicast.hosts:
 {% endif %}
 {% if elasticsearch_hostgroup is defined %}
 discovery.zen.minimum_master_nodes: {{ groups[elasticsearch_hostgroup] | length // 2 + 1 }}
+gateway.recovery_after_nodes: {{ groups[elasticsearch_hostgroup] | length // 2 + 1 }}
+{% else %}
+discovery.zen.minimum_master_nodes: 1
+gateway.recovery_after_nodes: 1
 {% endif %}
 {# Disable starting multiple nodes on a single system: #}
 {% if elasticsearch_only_allow_one_instance %}
