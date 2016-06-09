@@ -52,6 +52,9 @@ elasticsearch_network_host: "{{ ansible_default_ipv4.address }}"
 elasticsearch_disable_deletion_of_all_indices: false
 ```
 
+There are other optional variables in the defaults file that you may want to 
+review. More documentation will be added here later.
+
 Dependencies
 ------------
 

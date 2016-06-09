@@ -82,6 +82,13 @@
 
     when: "_elasticsearch_service_method == 'systemd'"
 
+  - name: Configure vm.max_map_count via sysctl
+    sysctl:
+      name: vm.max_map_count
+      value: "{{ elasticsearch_max_map_count }}"
+      sysctl_set: yes
+      state: present
+
   - name: Enable the Elasticsearch service
     service:
       name: elasticsearch
