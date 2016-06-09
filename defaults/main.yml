@@ -5,7 +5,7 @@
 elasticsearch_major_minor_version: 2.3
 
 # The following variables are used in the elasticsearch configuration file.
-# Please review templates/elasticsearch.yml.j2 for notes.
+# Please review templates/elasticsearch-2.x.yml.j2 for notes.
 # Most commented variables below have saner defaults in the above file.
 #elasticsearch_cluster_name: research01
 #elasticsearch_node_name: machine03
@@ -17,6 +17,7 @@ elasticsearch_transport_tcp_port: 9300
 elasticsearch_network_host: _site_
 elasticsearch_only_allow_one_instance: true
 elasticsearch_disable_deletion_of_all_indices: true
+#elasticsearch_recovery_after_nodes:
 
 # The following configures ES_RESTART_ON_UPGRADE in /etc/default/elasticsearch
 elasticsearch_restart_on_upgrade: false

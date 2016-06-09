@@ -74,11 +74,32 @@ discovery.zen.ping.unicast.hosts:
     - "{{ host }}"
 {% endfor %}
 {% endif %}
+{#
+    The following configures a requirement for the minimum number of 
+    master-capable nodes that should be connectable before performing master 
+    reelection (used to prevent split brain).
+
+    By default, this will be set to half the number of nodes in the hostgroup 
+    `elasticsearch_hostgroup` + 1, elsewise 1.
+#}
 {% if elasticsearch_hostgroup is defined %}
 discovery.zen.minimum_master_nodes: {{ groups[elasticsearch_hostgroup] | length // 2 + 1 }}
-gateway.recovery_after_nodes: {{ groups[elasticsearch_hostgroup] | length // 2 + 1 }}
 {% else %}
 discovery.zen.minimum_master_nodes: 1
+{% endif %}
+{#
+    `elasticsearch_recovery_after_nodes` is used to tell the cluster how many 
+    nodes that the cluster should wait for to come online before performing any 
+    data movement with regards to recovery.
+
+    By default, if `elasticsearch_hostgroup` is defined then this will be set 
+    to approximately 75% of the nodes in that group, elsewise 1.
+#}
+{% if elasticsearch_recovery_after_nodes is defined %}
+gateway.recovery_after_nodes: {{ elasticsearch_recovery_after_nodes }}
+{% elif elasticsearch_hostgroup is defined %}
+gateway.recovery_after_nodes: {{ groups[elasticsearch_hostgroup] | length * 3 // 4 }}
+{% else %}
 gateway.recovery_after_nodes: 1
 {% endif %}
 {# Disable starting multiple nodes on a single system: #}
@@ -86,5 +107,5 @@ gateway.recovery_after_nodes: 1
 node.max_local_storage_nodes: 1
 {% endif %}
 {# Require explicit names when deleting indices: #}
-# action.destructive_requires_name: true
+{# action.destructive_requires_name: true #}
 action.disable_delete_all_indices: {{ elasticsearch_disable_deletion_of_all_indices | ternary("true", "false") }}
