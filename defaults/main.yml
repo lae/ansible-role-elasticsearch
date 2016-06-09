@@ -23,7 +23,7 @@ elasticsearch_restart_on_upgrade: false
 
 # The following are resource limits, which are used to configure
 # /etc/security/limits.conf, the default file and the systemd unit file.
-elasticsearch_max_open_files: 131070
+elasticsearch_max_open_files: 131072
 # Either number of bytes, or "unlimited"
 elasticsearch_max_locked_memory: unlimited
 # This one automatically gets configured to the smaller of (RAM/2)-1GB & 31GB.
