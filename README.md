@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/lae/ansible-role-elasticsearch.svg?branch=master)](https://travis-ci.org/lae/ansible-role-elasticsearch)
 [![Galaxy Role](https://img.shields.io/badge/ansible--galaxy-elasticsearch-blue.svg)](https://galaxy.ansible.com/lae/elasticsearch/)
 
-elasticsearch
+lae.elasticsearch
 =========
 
 Installs and configures Elasticsearch as part of a multi-node cluster.
