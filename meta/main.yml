@@ -2,10 +2,8 @@ galaxy_info:
   author: Musee Ullah
   description: Installs and configures a production Elasticsearch cluster
   company: FireEye, Inc.
-  issue_tracker_url: https://github.com/fireeye-ops/ansible-role-elasticsearch/issues
   license: MIT
   min_ansible_version: 2.1
-  #github_branch:
   platforms:
   #- name: EL
   #  versions:
