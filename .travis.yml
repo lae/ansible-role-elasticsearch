@@ -6,15 +6,8 @@ dist: trusty
 
 addons:
   apt:
-  apt:
-    sources:
-    - sourceline: 'ppa:ubuntu-lxc/stable'
     packages:
     - python-pip
-    - lxc
-
-env:
-  - LXC_NAME=jessie-test LXC_ROOTFS=/var/lib/lxc/$LXC_NAME/rootfs
 
 install:
   # Install ansible
@@ -24,39 +17,30 @@ install:
   - ansible --version
 
   # Create ansible.cfg with correct roles_path
-  - printf '[defaults]\nroles_path=../\nhost_key_checking=False' >ansible.cfg
+  - printf '[defaults]\nroles_path=../' >ansible.cfg
 
   # Install role dependencies
   - ansible-galaxy install williamyeh.oracle-java
 
 script:
-  # Create and configure LXC container to test against
-  - sudo MIRROR=http://mirrors.us.kernel.org/debian lxc-create -n $LXC_NAME -t debian
-  - sudo lxc-start -n $LXC_NAME && sleep 5
-  - sudo lxc-attach -n $LXC_NAME -- apt-get -y --force-yes install python
-  - sudo /bin/bash -c "printf '\n$(sudo lxc-info -Hin $LXC_NAME) test.lxc' >> /etc/hosts"
-  - ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
-  - sudo mkdir -vm 0700 $LXC_ROOTFS/root/.ssh/
-  - sudo cp -v ~/.ssh/id_rsa.pub $LXC_ROOTFS/root/.ssh/authorized_keys
-
   # Basic role syntax check
   - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
 
   # Perform a test run with the playbook
-  - ansible-playbook tests/test.yml -i tests/inventory
+  - ansible-playbook tests/test.yml -i tests/inventory --connection=local
 
   # Perform a another test run with the playbook to check for idempotency
   - >
-    ansible-playbook tests/test.yml -i tests/inventory
+    ansible-playbook tests/test.yml -i tests/inventory --connection=local
     | grep -qP 'changed=0.*failed=0'
     && (echo "Idempotence: PASS"; exit 0)
     || (echo "Idempotence: FAIL"; exit 1)
 
-  - sudo lxc-attach -n $LXC_NAME -- service elasticsearch start && sleep 10
+  - sudo service elasticsearch start && sleep 10
 
-  - curl http://test.lxc:9200/
+  - curl http://localhost:9200/
 
-  - sudo cat $LXC_ROOTFS/var/log/elasticsearch/*
+  - sudo cat /var/log/elasticsearch/*
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/

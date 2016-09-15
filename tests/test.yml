@@ -1,5 +1,5 @@
 ---
-- hosts: test.lxc
+- hosts: localhost
   remote_user: root
   become: True
   roles:
