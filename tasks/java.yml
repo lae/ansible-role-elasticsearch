@@ -1,0 +1,10 @@
+---
+
+- name: Set Java for Ubuntu
+  set_fact:
+    java_ver: "{%if ansible_distribution_version | version_compare('15.10', '>=')%}openjdk-8-jre-headless{% else %}openjdk-7-jre-headless{% endif %}"
+  when: "{{ ansible_distribution == 'Ubuntu' }}"
+
+- name: Ensure Java is installed (Ubuntu/Debian)
+  apt: name={{ java_ver }} state=present update_cache=yes force=yes
+  when: ansible_os_family == 'Debian'

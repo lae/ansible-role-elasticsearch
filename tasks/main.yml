@@ -1,12 +1,29 @@
 ---
+- include: java.yml
+
 # tasks file for ansible-role-elasticsearch
-- name: "Gather OS specific variables"
-  include_vars: "{{ item }}"
+- name: 'Gather OS specific variables'
+  include_vars: '{{ item }}'
   with_first_found:
-    - "{{ ansible_distribution|lower }}-{{ ansible_distribution_version }}.yml"
-    - "{{ ansible_distribution|lower }}-{{ ansible_distribution_major_version }}.yml"
-    - "{{ ansible_distribution|lower }}.yml"
-    - "{{ ansible_os_family|lower }}.yml"
+    - '{{ ansible_distribution|lower }}-{{ ansible_distribution_version }}.yml'
+    - '{{ ansible_distribution|lower }}-{{ ansible_distribution_major_version }}.yml'
+    - '{{ ansible_distribution|lower }}.yml'
+    - '{{ ansible_os_family|lower }}.yml'
+
+- name: Set APT Repo for 5.x versions of ES
+  set_fact:
+    elasticsearch_repo: 'deb https://artifacts.elastic.co/packages/{{ elasticsearch_major_version }}.x/apt stable main'
+  when: '{{ elasticsearch_major_version >= 5 }}'
+
+- name: Set APT Repo for 2.x or lower versions of ES
+  set_fact:
+    elasticsearch_repo: 'deb http://packages.elastic.co/elasticsearch/{{ elasticsearch_major_version }}.x/debian stable main'
+  when: '{{ elasticsearch_major_version < 5 }}'
+
+- name: Determine Heap Size if not explicitly set
+  set_fact:
+    elasticsearch_heap_size: '{{ (ansible_memtotal_mb // 2 - 1024 < 31744) | ternary(ansible_memtotal_mb // 2 - 1024 , 31744) }}m'
+  when: '{{ elasticsearch_heap_size is not defined }}'
 
 - name: Trust Elasticsearch' packaging key
   apt_key:
@@ -14,84 +31,124 @@
     id: D88E42B4
     state: present
 
+- name: Add Elasticsearch Repository for Major Version {{ elasticsearch_major_version }}
+  apt_repository:
+    filename: elasticsearch
+    repo: '{{ elasticsearch_repo }}'
+    state: present
+
+- name: Install Elasticsearch
+  apt:
+    name: 'elasticsearch={{ _elasticsearch_major_minor_version }}.*'
+    update_cache: yes
+    state: present
+  notify:
+    - elasticsearch restart needed
+
+- name: Create data folder if necessary
+  file:
+    path: '{{ item }}'
+    state: directory
+    owner: '{{ elasticsearch_user }}'
+    group: '{{ elasticsearch_group }}'
+    mode: 0755
+  when: '{{ elasticsearch_path_data is defined }}'
+  with_items: '{{ elasticsearch_path_data | default([]) }}'
+
+- name: Create logs folder if necessary
+  file:
+    path: '{{ elasticsearch_path_logs }}'
+    state: directory
+    owner: '{{ elasticsearch_user }}'
+    group: '{{ elasticsearch_group }}'
+    mode: 0755
+  when: '{{ elasticsearch_path_logs is defined }}'
+
+- name: Configure elasticsearch.yml (2.x)
+  template:
+    src: elasticsearch-2.x.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+    backup: yes
+  notify:
+    - elasticsearch restart needed
+  when: '{{ elasticsearch_major_version == 2 }}'
+
+- name: Configure elasticsearch.yml (5.x >=)
+  template:
+    src: elasticsearch.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+    backup: yes
+  notify:
+    - elasticsearch restart needed
+  when: '{{ elasticsearch_major_version >= 5 }}'
+
+- name: Configure elasticsearch default file (2.x)
+  template:
+    src: default-2.x.j2
+    dest: /etc/default/elasticsearch
+    backup: yes
+  notify:
+    - elasticsearch restart needed
+  when: '{{ elasticsearch_major_version == 2 }}'
+
+# This is now the preferred way to configure the jvm
+# See https://www.elastic.co/guide/en/elasticsearch/reference/master/setting-system-settings.html#es-java-opts
+- name: Copy jvm.options File for instance (5.x >=)
+  template: 
+    src: jvm.options.j2 
+    dest: /etc/elasticsearch/jvm.options
+    owner: '{{ elasticsearch_user }}'
+    group: '{{ elasticsearch_group }}'
+    mode: 0644
+    force: yes
+  notify: elasticsearch restart needed
+  when: '{{ elasticsearch_major_version >= 5 }}'
+
+- name: Configure nofile for Elasticsearch in PAM limits
+  pam_limits:
+    domain: elasticsearch
+    limit_type: '-'
+    limit_item: nofile
+    value: '{{ elasticsearch_max_open_files }}'
+
+- name: Configure memlock for Elasticsearch in PAM limits
+  pam_limits:
+    domain: elasticsearch
+    limit_type: '-'
+    limit_item: memlock
+    value: '{{ elasticsearch_max_locked_memory }}'
+
 - block:
-  - name: Add Elasticsearch repository
-    apt_repository:
-      filename: elasticsearch
-      repo: 'deb http://packages.elastic.co/elasticsearch/2.x/debian stable main'
-      state: present
-
-  - name: Install Elasticsearch
-    apt:
-      name: "elasticsearch={{ elasticsearch_major_minor_version }}.*"
-      update_cache: yes
+  - name: Configure nofile for Elasticsearch in systemd unit file
+    lineinfile:
+      dest: /usr/lib/systemd/system/elasticsearch.service
+      insertafter: '^\[Service\]'
+      regexp: '^#?LimitNOFILE='
+      line: 'LimitNOFILE={{ elasticsearch_max_open_files }}'
       state: present
     notify:
-      - elasticsearch restart needed
+      - reload systemd unit files
 
-  - name: Configure elasticsearch.yml
-    template:
-      src: elasticsearch-2.x.yml.j2
-      dest: /etc/elasticsearch/elasticsearch.yml
-      backup: yes
-    notify:
-      - elasticsearch restart needed
-
-  - name: Configure elasticsearch default file
-    template:
-      src: default-2.x.j2
-      dest: /etc/default/elasticsearch
-      backup: yes
-    notify:
-      - elasticsearch restart needed
-
-  - name: Configure nofile for Elasticsearch in PAM limits
-    pam_limits:
-      domain: elasticsearch
-      limit_type: "-"
-      limit_item: nofile
-      value: "{{ elasticsearch_max_open_files }}"
-
-  - name: Configure memlock for Elasticsearch in PAM limits
-    pam_limits:
-      domain: elasticsearch
-      limit_type: "-"
-      limit_item: memlock
-      value: "{{ elasticsearch_max_locked_memory }}"
-
-  - block:
-    - name: Configure nofile for Elasticsearch in systemd unit file
-      lineinfile:
-        dest: /usr/lib/systemd/system/elasticsearch.service
-        insertafter: '^\[Service\]'
-        regexp: "^#?LimitNOFILE="
-        line: "LimitNOFILE={{ elasticsearch_max_open_files }}"
-        state: present
-      notify:
-        - reload systemd unit files
-
-    - name: Configure memlock for Elasticsearch in systemd unit file
-      lineinfile:
-        dest: /usr/lib/systemd/system/elasticsearch.service
-        insertafter: '^\[Service\]'
-        regexp: "^#?LimitMEMLOCK="
-        line: "LimitMEMLOCK={{ (elasticsearch_max_locked_memory == 'unlimited') | ternary('infinity', elasticsearch_max_locked_memory) }}"
-        state: present
-      notify:
-        - reload systemd unit files
-
-    when: "_elasticsearch_service_method == 'systemd'"
-
-  - name: Configure vm.max_map_count via sysctl
-    sysctl:
-      name: vm.max_map_count
-      value: "{{ elasticsearch_max_map_count }}"
-      sysctl_set: yes
+  - name: Configure memlock for Elasticsearch in systemd unit file
+    lineinfile:
+      dest: /usr/lib/systemd/system/elasticsearch.service
+      insertafter: '^\[Service\]'
+      regexp: '^#?LimitMEMLOCK='
+      line: "LimitMEMLOCK={{ (elasticsearch_max_locked_memory == 'unlimited') | ternary('infinity', elasticsearch_max_locked_memory) }}"
       state: present
+    notify:
+      - reload systemd unit files
 
-  - name: Enable the Elasticsearch service
-    service:
-      name: elasticsearch
-      enabled: yes
+  when: "_elasticsearch_service_method == 'systemd'"
 
-  when: "elasticsearch_major_minor_version >= 2.0"
+- name: Configure vm.max_map_count via sysctl
+  sysctl:
+    name: vm.max_map_count
+    value: '{{ elasticsearch_max_map_count }}'
+    sysctl_set: yes
+    state: present
+
+- name: Enable the Elasticsearch service
+  service:
+    name: elasticsearch
+    enabled: yes
