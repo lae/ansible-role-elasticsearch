@@ -59,7 +59,7 @@
     group: '{{ elasticsearch_group }}'
     mode: 0755
   when: '{{ elasticsearch_path_data is defined }}'
-  with_items: '{{ elasticsearch_path_data.split(",") | default([]) }}'
+  with_items: '{{ (elasticsearch_path_data | default(omit)).split(",") }}'
 
 - name: Create logs folder if necessary
   file:
