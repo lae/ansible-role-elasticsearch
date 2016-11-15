@@ -1,5 +1,7 @@
 # {{ ansible_managed }}
 {#
+    Elastic Config for version 5.0 or greater
+
     Please see the documentation for further information on configuration options:
     <http://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration.html>
 #}
@@ -47,8 +49,6 @@ path.data: {{ elasticsearch_path_data }}
 {% if elasticsearch_path_logs is defined %}
 path.logs: {{ elasticsearch_path_logs }}
 {% endif %}
-{# Lock the memory on startup. #}
-bootstrap.mlockall: true
 {#
     `elasticsearch_network_host` tells ES what IP address or interface to bind.
     By default we use `_site_`, which tells ES to use a private IP address that
@@ -74,6 +74,8 @@ discovery.zen.ping.unicast.hosts:
     - "{{ host }}"
 {% endfor %}
 {% endif %}
+
+
 {#
     The following configures a requirement for the minimum number of 
     master-capable nodes that should be connectable before performing master 
@@ -87,8 +89,9 @@ discovery.zen.minimum_master_nodes: {{ groups[elasticsearch_hostgroup] | length 
 {% else %}
 discovery.zen.minimum_master_nodes: 1
 {% endif %}
+
 {#
-    `elasticsearch_recovery_after_nodes` is used to tell the cluster how many 
+    `elasticsearch_recover_after_nodes` is used to tell the cluster how many 
     nodes that the cluster should wait for to come online before performing any 
     data movement with regards to recovery.
 
@@ -96,19 +99,20 @@ discovery.zen.minimum_master_nodes: 1
     to approximately 75% of the nodes in that group, elsewise 1.
 #}
 {% if elasticsearch_recovery_after_nodes is defined %}
-gateway.recovery_after_nodes: {{ elasticsearch_recovery_after_nodes }}
+gateway.recover_after_nodes: {{ elasticsearch_recovery_after_nodes }}
 {% elif elasticsearch_hostgroup is defined %}
-gateway.recovery_after_nodes: {{ groups[elasticsearch_hostgroup] | length * 3 // 4 }}
+gateway.recover_after_nodes: {{ groups[elasticsearch_hostgroup] | length * 3 // 4 }}
 {% else %}
-gateway.recovery_after_nodes: 1
+gateway.recover_after_nodes: 1
 {% endif %}
+
 {# Disable starting multiple nodes on a single system: #}
 {% if elasticsearch_only_allow_one_instance %}
 node.max_local_storage_nodes: 1
 {% endif %}
+
 {# Require explicit names when deleting indices: #}
-{# action.destructive_requires_name: true #}
-action.disable_delete_all_indices: {{ elasticsearch_disable_deletion_of_all_indices | ternary("true", "false") }}
+action.destructive_requires_name: {{ elasticsearch_disable_deletion_of_all_indices | ternary("true", "false") }}
 
 {# Allow for other changes to be set by the user #}
 {% if elasticsearch_config is defined %}
