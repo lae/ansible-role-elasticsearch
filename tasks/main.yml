@@ -1,6 +1,4 @@
 ---
-- include: java.yml
-
 # tasks file for ansible-role-elasticsearch
 - name: 'Gather OS specific variables'
   include_vars: '{{ item }}'
