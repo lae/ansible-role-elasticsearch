@@ -26,6 +26,11 @@
     elasticsearch_heap_size: '{{ (ansible_memtotal_mb // 2 - 1024 < 31744) | ternary(ansible_memtotal_mb // 2 - 1024 , 31744) }}m'
   when: '{{ elasticsearch_heap_size is not defined }}'
 
+- name: Ensure apt-transport-https is available
+  apt:
+    name: apt-transport-https
+    state: present
+
 - name: Trust Elasticsearch' packaging key
   apt_key:
     keyserver: pgp.mit.edu
