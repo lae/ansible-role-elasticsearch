@@ -5,12 +5,6 @@ galaxy_info:
   license: MIT
   min_ansible_version: 2.1
   platforms:
-  #- name: EL
-  #  versions:
-  #  - all
-  #  - 5
-  #  - 6
-  #  - 7
   - name: Ubuntu
     versions:
     - trusty
@@ -22,6 +16,3 @@ galaxy_info:
   galaxy_tags:
     - database
     - nosql
-
-dependencies:
-  - williamyeh.oracle-java

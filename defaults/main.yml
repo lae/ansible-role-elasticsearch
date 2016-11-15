@@ -2,7 +2,8 @@
 # defaults file for ansible-role-elasticsearch
 # This should be the major and minor version that you want to install.
 # This role will install the latest patch version.
-elasticsearch_major_minor_version: 2.3
+elasticsearch_major_version: 2
+elasticsearch_minor_version: 4
 
 # The following variables are used in the elasticsearch configuration file.
 # Please review templates/elasticsearch-2.x.yml.j2 for notes.
@@ -32,3 +33,9 @@ elasticsearch_max_map_count: 262144
 # This one automatically gets configured to the smaller of (RAM/2)-1GB & 31GB.
 # This variable must be specified in megabytes (e.g. "1024" for 1 gigabyte)
 #elasticsearch_heap_size:
+
+# If installing from apt/yum, it always creates an elasticsearch user/group but incase you changed it...
+elasticsearch_user: elasticsearch
+elasticsearch_group: elasticsearch
+
+#elasticsearch_config: {}

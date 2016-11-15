@@ -20,12 +20,7 @@
 
 # Heap size defaults to 256m min, 1g max
 # Set ES_HEAP_SIZE to 50% of available RAM, but no more than 31g
-{% if elasticsearch_heap_size is not defined %}
-{% set _es_heap_size = ansible_memtotal_mb // 2 - 1024 %}
-ES_HEAP_SIZE={{ (_es_heap_size < 31744) | ternary(_es_heap_size, 31744) }}m
-{% else %}
 ES_HEAP_SIZE={{ elasticsearch_heap_size }}m
-{% endif %}
 
 # Heap new generation
 #ES_HEAP_NEWSIZE=
