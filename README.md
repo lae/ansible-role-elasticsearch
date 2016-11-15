@@ -21,6 +21,10 @@ the machines in your cluster to only allow each other to communicate with each
 other on your transport port. You will likely want to also use a whitelist for 
 Elasticsearch API clients for the HTTP port.
 
+## Requirements
+
+This role assumes you hava Java already installed. Elastic 2 requires JDK 7 or higher and Elastic 5 requires JDK 8.
+
 ## Role Variables
 
 ### Mandatory Variables
@@ -37,6 +41,7 @@ Most variables below have saner defaults in this file.
 Likely to be defined per host:
 
 ```
+# The following defaults to 'ansible_hostname' (hopefully sane)
 elasticsearch_node_name: machine03
 elasticsearch_node_attributes: []
 elasticsearch_path_data: /mnt/disk1,/mnt/disk2,/mnt/disk3
@@ -45,9 +50,11 @@ elasticsearch_path_data: /mnt/disk1,/mnt/disk2,/mnt/disk3
 Likely to be defined per cluster/group (or `all`):
 
 ```
-elasticsearch_major_minor_version: 2.3
+elasticsearch_major_version: 2
+elasticsearch_minor_version: 4
 elasticsearch_path_logs: /var/log/elasticsearch
 elasticsearch_http_port: 9210
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-network.html#network-interface-values
 elasticsearch_network_host: "{{ ansible_default_ipv4.address }}"
 elasticsearch_disable_deletion_of_all_indices: false
 ```
@@ -55,23 +62,25 @@ elasticsearch_disable_deletion_of_all_indices: false
 There are other optional variables in the defaults file that you may want to 
 review. More documentation will be added here later.
 
-## Requirements
-
-This playbook assumes you hava Java already installed. Elastic 2 requires JDK 7 or higher and Elastic 5 requires JDK 8. 
-
 Example Playbook
 ----------------
+
+The following sets up an Elasticsearch 5.x cluster using @William-Yeh's Java 
+role to install Oracle Java 8:
 
 ```
 ---
 - hosts: cluster01
   become: True
   roles:
+    - williamyeh.oracle-java
     - lae.elasticsearch
   vars:
     elasticsearch_cluster_name: cluster01
     elasticsearch_hostgroup: cluster01
     elasticsearch_hostgroup_discovery: cluster01_discovery
+    elasticsearch_major_version: 5
+    elasticsearch_minor_version: 0
     elasticsearch_network_host: _global_
 ```
 
@@ -83,4 +92,7 @@ MIT
 Author Information
 ------------------
 
-TBD
+Thanks to:
+
+Musee "lae" Ullah - original author  
+Christopher "tankbusta" Schmitt - elasticsearch 5.x support  
