@@ -10,17 +10,20 @@
     - '{{ ansible_distribution|lower }}.yml'
     - '{{ ansible_os_family|lower }}.yml'
 
+- set_fact:
+    _elasticsearch_major_minor_version: "{{elasticsearch_major_version}}.{{elasticsearch_minor_version}}"
+
 - name: Set APT Repo for 5.x versions of ES
   set_fact:
-    elasticsearch_repo: 'deb https://artifacts.elastic.co/packages/{{ elasticsearch_major_version }}.x/apt stable main'
+    _elasticsearch_repo: 'deb https://artifacts.elastic.co/packages/{{ elasticsearch_major_version }}.x/apt stable main'
   when: '{{ elasticsearch_major_version >= 5 }}'
 
 - name: Set APT Repo for 2.x or lower versions of ES
   set_fact:
-    elasticsearch_repo: 'deb http://packages.elastic.co/elasticsearch/{{ elasticsearch_major_version }}.x/debian stable main'
+    _elasticsearch_repo: 'deb http://packages.elastic.co/elasticsearch/{{ elasticsearch_major_version }}.x/debian stable main'
   when: '{{ elasticsearch_major_version < 5 }}'
 
-- name: Determine Heap Size if not explicitly set
+- name: Calculate ES_HEAP_SIZE if not explicitly set
   set_fact:
     elasticsearch_heap_size: '{{ (ansible_memtotal_mb // 2 - 1024 < 31744) | ternary(ansible_memtotal_mb // 2 - 1024 , 31744) }}m'
   when: '{{ elasticsearch_heap_size is not defined }}'
@@ -31,10 +34,10 @@
     id: D88E42B4
     state: present
 
-- name: Add Elasticsearch Repository for Major Version {{ elasticsearch_major_version }}
+- name: Add elasticsearch repository
   apt_repository:
     filename: elasticsearch
-    repo: '{{ elasticsearch_repo }}'
+    repo: '{{ _elasticsearch_repo }}'
     state: present
 
 - name: Install Elasticsearch
@@ -75,7 +78,7 @@
 
 - name: Configure elasticsearch.yml (5.x >=)
   template:
-    src: elasticsearch.yml.j2
+    src: elasticsearch-5.x.yml.j2
     dest: /etc/elasticsearch/elasticsearch.yml
     backup: yes
   notify:
@@ -100,7 +103,6 @@
     owner: '{{ elasticsearch_user }}'
     group: '{{ elasticsearch_group }}'
     mode: 0644
-    force: yes
   notify: elasticsearch restart needed
   when: '{{ elasticsearch_major_version >= 5 }}'
 

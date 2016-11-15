@@ -55,10 +55,9 @@ elasticsearch_disable_deletion_of_all_indices: false
 There are other optional variables in the defaults file that you may want to 
 review. More documentation will be added here later.
 
-Dependencies
-------------
+## Requirements
 
-* williamyeh.oracle-java
+This playbook assumes you hava Java already installed. Elastic 2 requires JDK 7 or higher and Elastic 5 requires JDK 8. 
 
 Example Playbook
 ----------------

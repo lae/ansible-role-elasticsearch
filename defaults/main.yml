@@ -2,10 +2,8 @@
 # defaults file for ansible-role-elasticsearch
 # This should be the major and minor version that you want to install.
 # This role will install the latest patch version.
-elasticsearch_major_version: 5
-elasticsearch_minor_version: 0
-
-_elasticsearch_major_minor_version: "{{elasticsearch_major_version}}.{{elasticsearch_minor_version}}"
+elasticsearch_major_version: 2
+elasticsearch_minor_version: 4
 
 # The following variables are used in the elasticsearch configuration file.
 # Please review templates/elasticsearch-2.x.yml.j2 for notes.
