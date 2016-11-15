@@ -57,7 +57,8 @@ script:
   PASS"; exit 0) || (echo "Idempotence: FAIL"; cat /tmp/idempotency.log; exit 1)'
 - ansible -i tests/inventory all -u root -m service -a "name=elasticsearch state=started" -s && sleep 10
 - curl http://test.lxc:9200/
-- sudo cat $LXC_ROOTFS/var/log/elasticsearch/*
+- sudo lxc-attach -n $LXC_NAME -v PAGER=cat -- journalctl -xu elasticsearch.service
+- sudo cat $LXC_ROOTFS/etc/elasticsearch/elasticsearch.yml
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/

@@ -3,7 +3,7 @@
   remote_user: root
   become: True
   roles:
-    - williamyeh.oracle-java
+    - { role: williamyeh.oracle-java, tags: dependency }
     - ansible-role-elasticsearch
   vars:
     elasticsearch_cluster_name: test01
