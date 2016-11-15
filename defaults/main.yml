@@ -31,7 +31,7 @@ elasticsearch_max_locked_memory: unlimited
 # The following configures the vm.max_map_count sysctl entry.
 elasticsearch_max_map_count: 262144
 # This one automatically gets configured to the smaller of (RAM/2)-1GB & 31GB.
-# This variable must be specified in megabytes (e.g. "1024" for 1 gigabyte)
+# This variable must be specified with a suffixed unit such as 'm' or 'g'
 #elasticsearch_heap_size:
 
 # If installing from apt/yum, it always creates an elasticsearch user/group but incase you changed it...
