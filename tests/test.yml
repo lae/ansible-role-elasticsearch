@@ -7,3 +7,5 @@
     - ansible-role-elasticsearch
   vars:
     elasticsearch_cluster_name: test01
+  tasks:
+    - debug: msg="THE FOLLOWING RUN IS FOR ELASTICSEARCH 2.X (default)"
