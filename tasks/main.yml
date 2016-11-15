@@ -24,7 +24,6 @@
   - name: Install Elasticsearch
     apt:
       name: "elasticsearch={{ elasticsearch_major_minor_version }}.*"
-      update_cache: yes
       state: present
     notify:
       - elasticsearch restart needed
