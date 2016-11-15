@@ -9,22 +9,28 @@
     - '{{ ansible_os_family|lower }}.yml'
 
 - set_fact:
-    _elasticsearch_major_minor_version: "{{elasticsearch_major_version}}.{{elasticsearch_minor_version}}"
+    __elasticsearch_major_minor_version: "{{ elasticsearch_major_version }}.{{ elasticsearch_minor_version }}"
 
 - name: Set APT Repo for 5.x versions of ES
   set_fact:
-    _elasticsearch_repo: 'deb https://artifacts.elastic.co/packages/{{ elasticsearch_major_version }}.x/apt stable main'
+    __elasticsearch_repo_uri: 'https://artifacts.elastic.co/packages/{{ elasticsearch_major_version }}.x/apt'
   when: '{{ elasticsearch_major_version >= 5 }}'
 
 - name: Set APT Repo for 2.x or lower versions of ES
   set_fact:
-    _elasticsearch_repo: 'deb http://packages.elastic.co/elasticsearch/{{ elasticsearch_major_version }}.x/debian stable main'
+    __elasticsearch_repo_uri: 'http://packages.elastic.co/elasticsearch/{{ elasticsearch_major_version }}.x/debian'
   when: '{{ elasticsearch_major_version < 5 }}'
 
 - name: Calculate ES_HEAP_SIZE if not explicitly set
   set_fact:
     elasticsearch_heap_size: '{{ (ansible_memtotal_mb // 2 - 1024 < 31744) | ternary(ansible_memtotal_mb // 2 - 1024 , 31744) }}m'
   when: '{{ elasticsearch_heap_size is not defined }}'
+
+- name: Ensure apt-transport-https is available
+  apt:
+    name: apt-transport-https
+    state: present
+  when: "__elasticsearch_repo_uri.startswith('https')"
 
 - name: Trust Elasticsearch' packaging key
   apt_key:
@@ -35,17 +41,17 @@
 - name: Add elasticsearch repository
   apt_repository:
     filename: elasticsearch
-    repo: '{{ _elasticsearch_repo }}'
+    repo: 'deb {{ __elasticsearch_repo_uri }} stable main'
     state: present
 
 - name: Install Elasticsearch
   apt:
-    name: 'elasticsearch={{ _elasticsearch_major_minor_version }}.*'
+    name: 'elasticsearch={{ __elasticsearch_major_minor_version }}.*'
     state: present
   notify:
     - elasticsearch restart needed
 
-- name: Create data folder if necessary
+- name: Create data folders if necessary
   file:
     path: '{{ item }}'
     state: directory
@@ -53,7 +59,7 @@
     group: '{{ elasticsearch_group }}'
     mode: 0755
   when: '{{ elasticsearch_path_data is defined }}'
-  with_items: '{{ elasticsearch_path_data | default([]) }}'
+  with_items: '{{ (elasticsearch_path_data | default(omit)).split(",") }}'
 
 - name: Create logs folder if necessary
   file:
@@ -151,3 +157,5 @@
   service:
     name: elasticsearch
     enabled: yes
+
+# vim:ft=ansible:
