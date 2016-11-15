@@ -81,8 +81,10 @@ script:
 - ansible -i tests/inventory all -u root -m service -a "name=elasticsearch state=started" -s && sleep 10
 - echo "==== CHECKING ES 2.X ====" && curl http://test.lxc:9200/
 - sudo lxc-attach -n $LXC_NAME -v PAGER=cat -- journalctl -xu elasticsearch.service
+- sudo lxc-attach -n $LXC_NAME -v PAGER=cat -- /bin/bash -c "cat /var/log/elasticsearch/*"
 - echo "==== CHECKING ES 5.X ====" && curl http://test2.lxc:9200/
 - sudo lxc-attach -n $LXC_NAME-2 -v PAGER=cat -- journalctl -xu elasticsearch.service
+- sudo lxc-attach -n $LXC_NAME-2 -v PAGER=cat -- /bin/bash -c "cat /var/log/elasticsearch/*"
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
