@@ -1,46 +1,63 @@
 ---
-language: generic
-python: "2.7"
+language: python
+python: '2.7'
 sudo: required
 dist: trusty
-
 addons:
   apt:
+    sources:
+    - sourceline: ppa:ubuntu-lxc/stable
     packages:
     - python-pip
-
+    - lxc
+    - lxc-templates
+    - yum
+    - expect-dev
+cache:
+  directories:
+  - "$HOME/lxc/"
+  pip: true
+before_cache:
+- mkdir $HOME/lxc
+- sudo tar cf $HOME/lxc/cache.tar /var/cache/lxc/
+- sudo chown $USER. $HOME/lxc/cache.tar
+env:
+  - LXC_NAME=test-debian8 LXC_DISTRO=debian LXC_RELEASE=jessie
 install:
-  # Install ansible
-  - sudo pip install ansible
-
-  # Check ansible version
-  - ansible --version
-
-  # Create ansible.cfg with correct roles_path
-  - printf '[defaults]\nroles_path=../' >ansible.cfg
-
-  # Install role dependencies
-  - ansible-galaxy install williamyeh.oracle-java
-
+- pip install ansible
+- ansible --version
+- printf '[defaults]\nroles_path=../\nhost_key_checking=False\ncallback_whitelist=profile_tasks'
+  >ansible.cfg
+- ansible-galaxy install williamyeh.oracle-java
+- sudo tar xf $HOME/lxc/cache.tar -C / || echo "Didn't extract cache."
+- export LXC_ROOTFS=/var/lib/lxc/$LXC_NAME/rootfs
+- '[ "x${LXC_DISTRO}" == "xdebian" ] && sudo LANG= LC_ALL= LC_CTYPE= lxc-create -n
+  $LXC_NAME -t debian -- -r $LXC_RELEASE --mirror http://mirrors.us.kernel.org/debian
+  --packages python,ca-certificates,curl,sudo || true'
+- '[ "x${LXC_DISTRO}" == "xcentos" ] && sudo root_expire_password=no lxc-create -n
+  $LXC_NAME -t centos -- -R $LXC_RELEASE || true'
+- '[ "x${LXC_DISTRO}" == "xubuntu" ] && sudo lxc-create -n $LXC_NAME -t ubuntu --
+  -r $LXC_RELEASE --mirror http://mirrors.us.kernel.org/ubuntu --packages python,ca-certificates,curl,sudo
+  || true'
+- printf "\nlxc.mount.auto = proc:rw sys:rw cgroup-full:rw\nlxc.aa_profile = unconfined" | sudo tee -a /var/lib/lxc/$LXC_NAME/config
+- sudo lxc-start -n $LXC_NAME && until (sudo lxc-info -n $LXC_NAME | grep -q ^IP:);
+  do printf . && sleep 1; done && sleep 2
+- '[ "x${LXC_DISTRO}" == "xcentos" ] && sudo lxc-attach -n $LXC_NAME -- yum install
+    -y epel-release,ca-certificates,sudo || true'
+- sudo /bin/bash -c "printf '\n$(sudo lxc-info -Hin $LXC_NAME) test.lxc' >> /etc/hosts"
+- ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+- sudo mkdir -vm 0700 $LXC_ROOTFS/root/.ssh/
+- sudo cp -v ~/.ssh/id_rsa.pub $LXC_ROOTFS/root/.ssh/authorized_keys
 script:
-  # Basic role syntax check
-  - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
-
-  # Perform a test run with the playbook
-  - ansible-playbook tests/test.yml -i tests/inventory --connection=local
-
-  # Perform a another test run with the playbook to check for idempotency
-  - >
-    ansible-playbook tests/test.yml -i tests/inventory --connection=local
-    | grep -qP 'changed=0.*failed=0'
-    && (echo "Idempotence: PASS"; exit 0)
-    || (echo "Idempotence: FAIL"; exit 1)
-
-  - sudo service elasticsearch start && sleep 10
-
-  - curl http://localhost:9200/
-
-  - sudo cat /var/log/elasticsearch/*
+- ansible-playbook tests/test.yml -i tests/inventory --syntax-check
+- ansible-playbook tests/test.yml -i tests/inventory
+- unbuffer ansible-playbook tests/test.yml -i tests/inventory --skip dependency >/tmp/idempotency.log
+  2>&1
+- 'grep -A1 "PLAY RECAP" /tmp/idempotency.log | grep -qP "changed=0.*failed=0" && (echo "Idempotence:
+  PASS"; exit 0) || (echo "Idempotence: FAIL"; cat /tmp/idempotency.log; exit 1)'
+- ansible -i tests/inventory all -u root -m service -a "name=elasticsearch state=started" -s && sleep 10
+- curl http://test.lxc:9200/
+- sudo cat $LXC_ROOTFS/var/log/elasticsearch/*
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
