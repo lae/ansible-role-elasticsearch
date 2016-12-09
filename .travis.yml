@@ -6,8 +6,8 @@ cache:
   directories: [ '$HOME/lxc' ]
   pip: true
 env:
-- LXC_DISTRO=debian LXC_RELEASE=jessie
-- LXC_DISTRO=ubuntu LXC_RELEASE=xenial
+- LXC_DISTRO=debian LXC_RELEASE=jessie ES_MAJOR=2 ES_MINOR=4
+- LXC_DISTRO=ubuntu LXC_RELEASE=xenial ES_MAJOR=2 ES_MINOR=4
 - LXC_DISTRO=debian LXC_RELEASE=jessie ES_MAJOR=5 ES_MINOR=0
 - LXC_DISTRO=ubuntu LXC_RELEASE=xenial ES_MAJOR=5 ES_MINOR=0
 before_cache:
