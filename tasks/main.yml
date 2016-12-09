@@ -34,7 +34,7 @@
 
 - name: Trust Elasticsearch' packaging key
   apt_key:
-    keyserver: pgp.mit.edu
+    data: "{{ lookup('file', 'files/elasticsearch_packaging_key.asc') }}"
     id: D88E42B4
     state: present
 
