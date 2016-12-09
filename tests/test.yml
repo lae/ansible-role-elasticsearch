@@ -1,12 +1,21 @@
 ---
+- hosts: all
+  gather_facts: False
+  tasks:
+    - set_fact:
+        elasticsearch_major_version: 5
+        elasticsearch_minor_version: 1
+      when: "{{ lookup('env', 'ES_VERSION') == '5.x' }}"
+    - set_fact:
+        elasticsearch_major_version: 2
+        elasticsearch_minor_version: 4
+      when: "{{ lookup('env', 'ES_VERSION') == '2.x' }}"
 
 - hosts: all
   remote_user: root
   become: True
   vars:
     elasticsearch_cluster_name: travis_test
-    elasticsearch_major_version: "{{ lookup('env', 'ES_VERSION').split('.')[0] }}"
-    elasticsearch_minor_version: "{{ lookup('env', 'ES_VERSION').split('.')[1] }}"
   pre_tasks:
     - debug:
         msg: "THIS RUN IS FOR ELASTICSEARCH {{ elasticsearch_major_version }}.{{ elasticsearch_minor_version }}"
