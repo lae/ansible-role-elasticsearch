@@ -1,11 +1,12 @@
 ---
-- hosts: test.lxc
+
+- hosts: all
   remote_user: root
   become: True
   vars:
-    elasticsearch_cluster_name: test01
-  tasks:
-    - debug: msg="THIS RUN IS FOR ELASTICSEARCH 2.X (default)"
+    elasticsearch_cluster_name: travis_test
+    elasticsearch_major_version: "{{ lookup('env', 'ES_MAJOR') | omit }}"
+    elasticsearch_minor_version: "{{ lookup('env', 'ES_MINOR') | omit }}"
   roles:
     - { role: williamyeh.oracle-java, tags: dependency }
     - ansible-role-elasticsearch
