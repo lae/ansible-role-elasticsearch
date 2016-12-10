@@ -5,3 +5,8 @@
     - { name: lae.travis-lxc }
   vars:
     host_quantity: 3
+
+- hosts: cluster01
+  become: True
+  roles:
+    - williamyeh.oracle-java
