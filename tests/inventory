@@ -1,2 +1,10 @@
-test.lxc
-test2.lxc
+[cluster01]
+test01.lxc
+test02.lxc
+test03.lxc
+
+[cluster01_discovery]
+test01.lxc
+
+[cluster01:vars]
+ansible_ssh_user=root

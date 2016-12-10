@@ -1,11 +1,40 @@
 ---
-- hosts: test.lxc
-  remote_user: root
+- hosts: all
+  gather_facts: False
+  tasks:
+    - set_fact:
+        elasticsearch_major_version: 5
+        elasticsearch_minor_version: 1
+      when: "{{ lookup('env', 'ES_VERSION') == '5.x' }}"
+    - set_fact:
+        elasticsearch_major_version: 2
+        elasticsearch_minor_version: 4
+      when: "{{ lookup('env', 'ES_VERSION') == '2.x' }}"
+
+- hosts: all
   become: True
   vars:
-    elasticsearch_cluster_name: test01
-  tasks:
-    - debug: msg="THIS RUN IS FOR ELASTICSEARCH 2.X (default)"
+    elasticsearch_heap_size: "512m"
+    elasticsearch_cluster_name: cluster01
+    elasticsearch_hostgroup: cluster01
+    elasticsearch_hostgroup_discovery: cluster01_discovery
+    elasticsearch_network_host: _site_
+  environment:
+    # https://github.com/elastic/elasticsearch/pull/21899
+    ES_SKIP_SET_KERNEL_PARAMETERS: "true"
+  pre_tasks:
+    - debug:
+        msg: "THIS RUN IS FOR ELASTICSEARCH {{ elasticsearch_major_version }}.{{ elasticsearch_minor_version }}"
   roles:
     - { role: williamyeh.oracle-java, tags: dependency }
     - ansible-role-elasticsearch
+  tasks:
+    - name: Start Elasticsearch
+      service:
+        name: elasticsearch
+        state: started
+    - name: Wait for Elasticsearch's HTTP API to activate
+      local_action: wait_for
+      args:
+        port: 9200
+        host: "{{ inventory_hostname }}"
