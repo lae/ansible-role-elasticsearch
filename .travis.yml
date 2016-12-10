@@ -29,7 +29,6 @@ script:
   (echo "Idempotence: PASS"; exit 0) || (echo "Idempotence: FAIL"; cat /tmp/idempotency.log;
   exit 1)'
 - sudo lxc-attach -n test01 -v PAGER=cat -- journalctl -xn
-- ansible -i tests/inventory all -u root -m service -a "name=elasticsearch state=started" -s && sleep 20
 - curl http://test01.lxc:9200/?pretty=1
 - curl http://test01.lxc:9200/_cluster/health?pretty=1
 - sudo lxc-attach -n test01 -v PAGER=cat -- journalctl -xu elasticsearch.service

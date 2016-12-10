@@ -28,3 +28,13 @@
   roles:
     - { role: williamyeh.oracle-java, tags: dependency }
     - ansible-role-elasticsearch
+  tasks:
+    - name: Start Elasticsearch
+      service:
+        name: elasticsearch
+        state: started
+    - name: Wait for Elasticsearch's HTTP API to activate
+      local_action: wait_for
+      args:
+        port: 9200
+        host: "{{ inventory_hostname }}"
