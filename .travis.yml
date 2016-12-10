@@ -20,19 +20,18 @@ install:
 - printf '[defaults]\nroles_path=../\nhost_key_checking=False\ncallback_whitelist=profile_tasks'
   >ansible.cfg
 - ansible-galaxy install williamyeh.oracle-java lae.travis-lxc
-- ansible-playbook -vv tests/install.yml
+- ansible-playbook -vvv tests/install.yml
 script:
 - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
 - ansible-playbook tests/test.yml -i tests/inventory
-- unbuffer ansible-playbook tests/test.yml -i tests/inventory --skip dependency >/tmp/idempotency.log 2>&1
+- unbuffer ansible-playbook -vvv tests/test.yml -i tests/inventory --skip dependency >/tmp/idempotency.log 2>&1
 - 'grep -A1 "PLAY RECAP" /tmp/idempotency.log | grep -qP "changed=0.*failed=0" &&
   (echo "Idempotence: PASS"; exit 0) || (echo "Idempotence: FAIL"; cat /tmp/idempotency.log;
   exit 1)'
-- sudo lxc-attach -n test01 -v PAGER=cat -- journalctl -xn
-- curl http://test01.lxc:9200/?pretty=1
-- curl http://test01.lxc:9200/_cluster/health?pretty=1
-- sudo lxc-attach -n test01 -v PAGER=cat -- journalctl -xu elasticsearch.service
-- sudo lxc-attach -n test01 -v PAGER=cat -- /bin/bash -c "cat /var/log/elasticsearch/*"
+- ansible -m uri -a 'url=http://{{ inventory_hostname }}:9200' -i tests/inventory all 
+- ansible -m uri -a 'url=http://{{ inventory_hostname }}:9200/_cluster/health' -i tests/inventory all 
+- ansible -m shell -a "PAGER=cat journalctl -xu elasticsearch" -i tests/inventory all -s
+- ansible -m shell -a "cat /var/log/elasticsearch/*" -i tests/inventory all -s
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
