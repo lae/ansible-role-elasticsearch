@@ -17,8 +17,7 @@ install:
 - sudo apt-get install -y expect-dev
 - pip install ansible
 - ansible --version
-- printf '[defaults]\nroles_path=../\nhost_key_checking=False\ncallback_whitelist=profile_tasks'
-  >ansible.cfg
+- printf '[defaults]\nroles_path=../\ncallback_whitelist=profile_tasks' >ansible.cfg
 - ansible-galaxy install williamyeh.oracle-java lae.travis-lxc
 - ansible-playbook -vvv tests/install.yml
 script:
