@@ -123,6 +123,13 @@
     limit_item: memlock
     value: '{{ elasticsearch_max_locked_memory }}'
 
+- name: Configure nproc for Elasticsearch in PAM limits
+  pam_limits:
+    domain: elasticsearch
+    limit_item: nproc
+    limit_type: '-'
+    value: '{{ elasticsearch_max_num_threads }}'
+
 - block:
   - name: Configure nofile for Elasticsearch in systemd unit file
     lineinfile:
