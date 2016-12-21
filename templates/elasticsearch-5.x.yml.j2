@@ -101,7 +101,7 @@ discovery.zen.minimum_master_nodes: 1
 {% if elasticsearch_recovery_after_nodes is defined %}
 gateway.recover_after_nodes: {{ elasticsearch_recovery_after_nodes }}
 {% elif elasticsearch_hostgroup is defined %}
-gateway.recover_after_nodes: {{ groups[elasticsearch_hostgroup] | length * 3 // 4 }}
+gateway.recover_after_nodes: {{ (groups[elasticsearch_hostgroup] | length * 3) // 4 }}
 {% else %}
 gateway.recover_after_nodes: 1
 {% endif %}
