@@ -109,19 +109,16 @@
   notify: elasticsearch restart needed
   when: '{{ elasticsearch_major_version >= 5 }}'
 
-- name: Configure nofile for Elasticsearch in PAM limits
+- name: Configure PAM limits for Elasticsearch
   pam_limits:
     domain: elasticsearch
-    limit_type: '-'
-    limit_item: nofile
-    value: '{{ elasticsearch_max_open_files }}'
-
-- name: Configure memlock for Elasticsearch in PAM limits
-  pam_limits:
-    domain: elasticsearch
-    limit_type: '-'
-    limit_item: memlock
-    value: '{{ elasticsearch_max_locked_memory }}'
+    limit_type: "{{ item.0 }}"
+    limit_item: "{{ item.1 }}"
+    value: "{{ item.2 }}"
+  with_items:
+    - [['-', 'nofile', '{{ elasticsearch_max_open_files }}']]
+    - [['-', 'memlock', '{{ elasticsearch_max_locked_memory }}']]
+    - [['-', 'nproc', '{{ elasticsearch_max_num_threads }}']]
 
 - block:
   - name: Configure nofile for Elasticsearch in systemd unit file
