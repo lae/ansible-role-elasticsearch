@@ -150,6 +150,8 @@
     sysctl_set: yes
     state: present
 
+- include: plugins.yml
+
 - name: Enable the Elasticsearch service
   service:
     name: elasticsearch
