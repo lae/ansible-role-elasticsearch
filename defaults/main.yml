@@ -1,4 +1,7 @@
 ---
+# elasticsearch_home is the default install path where the executables are for Debian/RHEL
+elasticsearch_home: /usr/share/elasticsearch
+
 # defaults file for ansible-role-elasticsearch
 # This should be the major and minor version that you want to install.
 # This role will install the latest patch version.
@@ -41,5 +44,8 @@ elasticsearch_max_num_threads: 2048
 # If installing from apt/yum, it always creates an elasticsearch user/group but incase you changed it...
 elasticsearch_user: elasticsearch
 elasticsearch_group: elasticsearch
+
+# A list of plugins to install via elasticsearch-plugin
+elasticsearch_plugins: []
 
 #elasticsearch_config: {}

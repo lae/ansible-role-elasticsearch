@@ -1,0 +1,18 @@
+---
+
+- set_fact:
+    __elasticsearch_plugin_executable: "{{ elasticsearch_home }}/bin/elasticsearch-plugin"
+  when: __elasticsearch_major_minor_version | version_compare('5.0', '>=')
+
+- set_fact:
+    __elasticsearch_plugin_executable: "{{ elasticsearch_home }}/bin/plugin"
+  when: __elasticsearch_major_minor_version | version_compare('5.0', '<')
+
+- name: ensure elasticsearch plugins exist
+  elasticsearch_plugin:
+    state: present
+    name: '{{ item }}'
+    plugin_bin: '{{ __elasticsearch_plugin_executable }}'
+  with_items: '{{ elasticsearch_plugins | default([]) }}'
+  notify:
+    - elasticsearch restart needed
