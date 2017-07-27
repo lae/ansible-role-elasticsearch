@@ -73,7 +73,7 @@ role to install Oracle Java 8:
 - hosts: cluster01
   become: True
   roles:
-    - williamyeh.oracle-java
+    - srsp.oracle-java
     - lae.elasticsearch
   vars:
     elasticsearch_cluster_name: cluster01
