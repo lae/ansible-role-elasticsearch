@@ -10,3 +10,6 @@
   become: True
   roles:
     - williamyeh.oracle-java
+  vars:
+    java_subversion: 141
+    jdk_version_detail: 8u141-b15
